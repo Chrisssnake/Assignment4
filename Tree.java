@@ -1,68 +1,101 @@
 package application;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Vector;
+import java.util.*;
 
-import javafx.geometry.Point2D;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
+import javafx.*;
 
 public class Tree {
-	private Node root; // the root node of the tree
-	
-	
-	/*******************************	Implementation Here:  *****************************************/
-	
-	/*
-	 * The function below is to insert a new node to the tree. You need to modify it by imposing "Red-Black" constraints
-	 * If a node is successfully inserted, it returns "true"
-	 * If the node to be inserted has the value already exist in the tree, it should not be inserted and return "false". So you need to modify the code to forbid 
-	 * nodes with repeating values to be inserted. 
-	 */
-	public boolean insertNode(Node node) {
-		
-		//Here is just an example of setting colors for a node. So far, it is in green color. But you need to modify the code to dynamically adjust the color to
-		//either RED or BLACK according to the red-black logic 
-		node.setColor(Node.GREEN);
-		
-		// if the root exists
-		if (root == null) {
-			root = node; // let the root point to the current node
-		} else {
-			Node current_node = root;
-			while (current_node != null) {
-				int value = current_node.getValue();
-				if (node.getValue() < value) // go to the left sub-tree
-				{
-					if (current_node.getLeft() != null) // if the left node is
-														// not empty
-					{
-						current_node = current_node.getLeft();
-					} else // put node as the left child of current_node
-					{
-						current_node.setLeft(node);
-						current_node = null;
-					}
-				} else // go to the right
-				{
-					if (current_node.getRight() != null) // if the right node is
-															// not empty
-					{
-						current_node = current_node.getRight();
-					} else // put node as the right child of current_node
-					{
-						current_node.setRight(node);
-						current_node = null;
-					}
+    private Node root; // the root node of the tree
 
-				}
-			}
-		}
+    /******************************* Implementation Here: *****************************************/
+    /*
+     * The function below is to insert a new node to the tree. You need to modify it by imposing "Red-Black" constraints
+     * If a node is successfully inserted, it returns "true"
+     * If the node to be inserted has the value already exist in the tree, it should not be inserted and return "false". 
+     * So you need to modify the code to forbid nodes with repeating values to be inserted.
+     */
+    public boolean insertNode(Node node) {
+        // if the root exists
+        if (root == null) {
+            root = node; // let the root point to the current node
+            node.setColor(Node.BLACK); // The root node is always black.
+            return true;
+        } else {
+            Node current_node = root;
+            Node parent = null;
+            while (current_node != null) {
+                parent = current_node;
+                int value = current_node.getValue();
+                if (node.getValue() < value) // go to the left sub-tree
+                {
+                    current_node = current_node.getLeft();
+                } else if (node.getValue() > value) // go to the right
+                {
+                    current_node = current_node.getRight();
+                } else {
+                    // A node with the same value exists in the tree. Do not insert.
+                    return false;
+                }
+            }
+            // The node is not in the tree. Insert it.
+            node.setParent(parent);
+            if (node.getValue() < parent.getValue()) {
+                parent.setLeft(node);
+            } else {
+                parent.setRight(node);
+            }
+            // Set the color of the new node to red. According to the red-black tree property, the new node must be red.
+            node.setColor(Node.RED);
+            // Fix the red-black tree properties.
+            fixInsertion(node);
+            return true;
+        }
+    }
 
-		return true;
-	}
+    /**
+     * Restore the red-black tree properties after the insertion of a node.
+     *
+     * @param node The newly inserted node.
+     */
+    private void fixInsertion(Node node) {
+        while (node != root && node.getParent().getColor() == Node.RED) {
+            Node parent = node.getParent();
+            Node grandparent = parent.getParent();
+            if (parent == grandparent.getLeft()) {
+                Node uncle = grandparent.getRight();
+                if (uncle != null && uncle.getColor() == Node.RED) {
+                    parent.setColor(Node.BLACK);
+                    uncle.setColor(Node.BLACK);
+                    grandparent.setColor(Node.RED);
+                    node = grandparent;
+                } else {
+                    if (node == parent.getRight()) {
+                        node = parent;
+                        rotateLeft(node);
+                        parent = node.getParent();
+                    }
+                    parent.setColor(Node.BLACK);
+                    grandparent.setColor(Node.RED);
+                    rotateRight(grandparent);
+                }
+            } else {
+                Node uncle = grandparent.getLeft();
+                if (uncle != null && uncle.getColor() == Node.RED) {
+                    parent.setColor(Node.BLACK);
+                    uncle.setColor(Node.BLACK);
+                    grandparent.setColor(Node.RED);
+                    node = grandparent;
+                } else {
+                    if (node == parent.getLeft()) {
+                        node = parent;
+                        rotateRight(node);
+                        parent = node.getParent();
+                    }
+                    parent.setColor(Node.BLACK);
+                    grandparent.setColor(Node.RED);
+                    rotateLeft(grandparent);
+                }
+            }
 
 	
 
