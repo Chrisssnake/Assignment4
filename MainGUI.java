@@ -24,6 +24,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
 
+/** This is the GUI class that visualizes the Red-Black BST.
+ * 
+ *  adapted by Christian Patterson, Reilly Downing
+ * 
+ * */
 public class MainGUI extends Application {
 	/*Below are GUI data members */
 	private int canvas_width = 640; //canvas width

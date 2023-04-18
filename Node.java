@@ -8,6 +8,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+/** 
+ * 	The Node class implements binary tree nodes and their related methods to be used in a data structure
+ * 	The purpose of this method is to aid in the function of a balanced Red-Black Binary search tree
+ * 	
+ *  @author Christian Patterson, Reilly Downing
+ * */
 public class Node {
 	private int value; //store the value of the node
 	private int color=1; //The color of the node (for red-black tree, it can be either BLACK or RED, as defined in the 

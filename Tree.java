@@ -7,6 +7,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+/** 
+ * 	The Tree class implements the Binary Search tree and its related methods as a data structure
+ * 	The purpose of this method is to design a functional and balanced Red-Black Binary search tree
+ * 	
+ *  @author Christian Patterson, Reilly Downing
+ * */
 public class Tree {
     private Node root; // the root node of the tree
 
@@ -17,43 +23,55 @@ public class Tree {
      * If the node to be inserted has the value already exist in the tree, it should not be inserted and return "false". 
      * So you need to modify the code to forbid nodes with repeating values to be inserted.
      */
-    public boolean insertNode(Node node) {
+    public boolean insertNode(Node node) 
+    {
         // if the root exists
-        if (root == null) {
+        if (root == null) 
+        {
             root = node; // let the root point to the current node
             node.setColor(Node.BLACK); // The root node is always black.
             return true;
-        } else {
+        } else 
+        {
             Node current_node = root;
             Node parent = null;
-            while (current_node != null) {
+            
+            while (current_node != null) 
+            {
                 parent = current_node;
                 int value = current_node.getValue();
                 if (node.getValue() < value) // go to the left sub-tree
                 {
                     current_node = current_node.getLeft();
-                } else if (node.getValue() > value) // go to the right
+                } 
+                else if (node.getValue() > value) // go to the right
                 {
                     current_node = current_node.getRight();
-                } else {
+                } else 
+                {
                     // A node with the same value exists in the tree. Do not insert.
                     return false;
                 }
-            }
+            }// end while
+            
             // The node is not in the tree. Insert it.
             node.setParent(parent);
-            if (node.getValue() < parent.getValue()) {
+            if (node.getValue() < parent.getValue()) 
+            {
                 parent.setLeft(node);
-            } else {
+            } else 
+            {
                 parent.setRight(node);
             }
+            
             // Set the color of the new node to red. According to the red-black tree property, the new node must be red.
             node.setColor(Node.RED);
             // Fix the red-black tree properties.
             fixInsertion(node);
             return true;
-        }
-    }
+        } //end outer else
+        
+    }// end insertNode
 
     private void fixInsertion(Node node) {
         // Case 1: The newly inserted node is the root node.
@@ -61,32 +79,40 @@ public class Tree {
             node.setColor(Node.BLACK);
             return;
         }
-
-        // Case 2: The parent node of the newly inserted node is black.
-        if (node.getParent().getColor() == Node.BLACK) {
-            return;
-        }
-
-        // Case 3: The parent and uncle node of the newly inserted node are both red.
         Node parent = node.getParent();
+        // Case 2: The parent node of the newly inserted node is black.       
+        if (node.getParent().getColor() == Node.BLACK) {
+        	return;
+        }
+        
+        // Case 3: The parent and uncle node of the newly inserted node are both red.
+        
         Node grandparent = parent.getParent();
         Node uncle = getUncle(node);
-        if (uncle != null && uncle.getColor() == Node.RED) {
+        
+        if (uncle != null && uncle.getColor() == Node.RED) 
+        {
             parent.setColor(Node.BLACK);
             uncle.setColor(Node.BLACK);
             grandparent.setColor(Node.RED);
-            fixInsertion(grandparent);
+            fixInsertion(parent);
+            root.setColor(Node.BLACK);
             return;
         }
-
+        
+        if (grandparent == null)
+        	return;
+        			
         // Case 4: The parent node of the newly inserted node is red and the uncle node is black, and the newly inserted node is the right child of the parent node, and the parent node is the left child of the grandparent node.
-        if (node == parent.getRight() && parent == grandparent.getLeft()) {
+        if (node == parent.getRight() && parent == grandparent.getLeft()) 
+        {
             rotateLeft(parent);
             node = node.getLeft();
         }
 
         // Case 5: The parent node of the newly inserted node is red and the uncle node is black, and the newly inserted node is the left child of the parent node, and the parent node is the right child of the grandparent node.
-        if (node == parent.getLeft() && parent == grandparent.getRight()) {
+        if (node == parent.getLeft() && parent == grandparent.getRight()) 
+        {
             rotateRight(parent);
             node = node.getRight();
         }
@@ -96,135 +122,121 @@ public class Tree {
         grandparent = parent.getParent();
         parent.setColor(Node.BLACK);
         grandparent.setColor(Node.RED);
-        if (node == parent.getLeft()) {
+        
+        if (node == parent.getLeft()) 
+        {
             rotateRight(grandparent);
-        } else {
+        } else 
+        {
             rotateLeft(grandparent);
         }
     
         // Make sure the root node is always black.
         root.setColor(Node.BLACK);
-    }
-    private Node getUncle(Node node) {
+    } // end fixInsertion
+    
+    /**
+     * Return the given node's parent's sibling (the node's Uncle)
+     *
+     * @param node The nephew node
+     * @return the Uncle node
+     */
+    private Node getUncle(Node node) 
+    {
     	Node grandparent = getGrandparent(node);
-    	if (grandparent == null) {
-    	return null;
+    	if (grandparent == null) 						// if no grandparent then node or node's parent is root: 
+    	{												//	no Uncle, return null	
+    		return null;
     	}
-    	if (node.getParent() == grandparent.getLeft()) {
-    	return grandparent.getRight();
-    	} else {
-    	return grandparent.getLeft();
+    	
+    	if (node.getParent() == grandparent.getLeft()) 	// if parent is a left child, its sibling is the right child,
+    	{												//  vice versa
+    		return grandparent.getRight();
+    	} else 
+    	{
+    		return grandparent.getLeft();
     	}
-    	}
-    private Node getGrandparent(Node node) {
-        if (node != null && node.getParent() != null) {
+    } // end getUncle
+    
+    /**
+     * Return the given node's parent's parent (the node's grandparent)
+     *
+     * @param node The grandchild node
+     * @return the Grandparent node
+     */
+    private Node getGrandparent(Node node) 
+    {
+        if (node != null && node.getParent() != null) 	// if the parent and node aren't null,
+        {												//  return the parent's parent
             return node.getParent().getParent();
-        } else {
+        } else 
+        {												// otherwise the grandparent is null
             return null;
         }
-    }
+    } // end getGrandparent
 
     /**
      * Rotate a node to the left.
      *
      * @param node The node to rotate.
      */
-    private void rotateLeft(Node node) {
-        Node right = node.getRight();
+    private void rotateLeft(Node node) 
+    {
+        Node right = node.getRight();					// create pointers to track nodes
         node.setRight(right.getLeft());
-        if (right.getLeft() != null) {
+        
+        if (right.getLeft() != null) 					// if there is a child node to the left, this swings it to the new parent
+        {
             right.getLeft().setParent(node);
         }
-        right.setParent(node.getParent());
-        if (node.getParent() == null) {
+    
+        right.setParent(node.getParent());				// node's right child takes its place
+        
+        if (node.getParent() == null) 					// if node was the root, its right child is now the root
+        {
             root = right;
-        } else if (node == node.getParent().getLeft()) {
+        } else if (node == node.getParent().getLeft()) 	// otherwise set node's right child to appropriate place as child of
+        {												//  node's parent
             node.getParent().setLeft(right);
-        } else {
+        } else 
+        {
             node.getParent().setRight(right);
         }
-        right.setLeft(node);
+        
+        right.setLeft(node);							// ensure node has been rotated to the left position, establish relationship
         node.setParent(right);
-    }
+    } // end rotateLeft
 
     /**
      * Rotate a node to the right.
      *
      * @param node The node to rotate.
      */
-    private void rotateRight(Node node) {
-        Node left = node.getLeft();
+    private void rotateRight(Node node) 
+    {
+        Node left = node.getLeft();						// create pointers to track nodes
         node.setLeft(left.getRight());
-        if (left.getRight() != null) {
+        if (left.getRight() != null) 					// if there is a child node to the right, this swings it to the new parent
+        {
             left.getRight().setParent(node);
         }
-        left.setParent(node.getParent());
-        if (node.getParent() == null) {
-            root = left;
-        } else if (node == node.getParent().getRight()) {
+        left.setParent(node.getParent());				// node's left child takes its place
+        
+        if (node.getParent() == null)                   // if node was the root, its left child is now the root            
+        {                                                                                                                   
+            root = left;                                                                                                    
+        } else if (node == node.getParent().getRight()) // otherwise set node's left child to appropriate place as child of
+        {                                               //  node's parent                                                   
             node.getParent().setRight(left);
-        } else {
+        } else 
+        {
             node.getParent().setLeft(left);
         }
+                                                       	// ensure node has been rotated to the left position, establish relationship
         left.setRight(node);
         node.setParent(left);
-    }
+    } // end rotate right
 
-    /**
-     * Check whether a node is a left child of its parent.
-     *
-     * @param node The node to check.
-     * @return true if the node is a left child of its parent, false otherwise.
-     */
-    private boolean isLeftChild(Node node) {
-        return node == node.getParent().getLeft();
-    }
-
-    /**
-     * Check whether a node is a right child of its parent.
-     *
-     * @param node The node to check.
-     * @return true if the node is a right child of its parent, false otherwise.
-     */
-    private boolean isRightChild(Node node) {
-        return node == node.getParent().getRight();
-    }
-
-    /**
-     * Check whether a node is a red node.
-     *
-     * @param node The node to check.
-     * @return true if the node is red, false otherwise.
-     */
-    private boolean isRed(Node node) {
-        return node != null && node.getColor() == Node.RED;
-    }
-
-    /**
-     * Check whether a node is a black node.
-     *
-     * @param node The node to check.
-     * @return true if the node is black, false otherwise.
-     */
-    private boolean isBlack(Node node) {
-        return node == null || node.getColor() == Node.BLACK;
-    }
-
-    /**
-     * Swap the colors of two nodes.
-     *
-     * @param node1 The first node.
-     * @param node2 The second node.
-     */
-    private void swapColors(Node node1, Node node2) {
-        int temp = node1.getColor();
-        node1.setColor(node2.getColor());
-        node2.setColor(temp);
-    }
-
-
-
-	
 
 	
 /*************************************************	End of Implementation   **************************************************************/
