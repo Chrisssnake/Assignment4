@@ -17,43 +17,70 @@ public class Tree {
     private Node root; // the root node of the tree
 
     /******************************* Implementation Here: *****************************************/
-    /*
-     * The function below is to insert a new node to the tree. You need to modify it by imposing "Red-Black" constraints
-     * If a node is successfully inserted, it returns "true"
-     * If the node to be inserted has the value already exist in the tree, it should not be inserted and return "false". 
-     * So you need to modify the code to forbid nodes with repeating values to be inserted.
-     */
+    
+    public static final int BLACK = 0; // final variables created to avoid repetition of typing Node.RED/Node.BLACK
+    public static final int RED = 1;
     
     // Helper variable for search function (changes to true if a value is already present in the tree)
     public static boolean found = false;
-    public static final int BLACK = 0;
-    public static final int RED = 1;
-
-    private boolean isRed(Node node) {
-        if (node == null) return false;
+    
+    /**
+     * This method returns whether a givennode is red
+     * 
+     * @param node The node in question
+     * @return True if node is Red, otherwise returns false
+     */
+    private boolean isRed(Node node) 
+    {
+        if (node == null) return false;	
         return (node.getColor() == RED);
-    }
-
-    private Node rotateLeft(Node h){
+    } // end isRed()
+    
+    /**
+     * This method rotates nodes left around a given node
+     * 
+     * @param h the node around which rotation will occur
+     * @return the right child of the given node, in its new location
+     */
+    private Node rotateLeft(Node h)
+    {
         Node x = h.getRight();
         h.setRight(x.getLeft());
+        
         x.setLeft(h);
         x.setColor(x.getLeft().getColor());
         x.getLeft().setColor(RED);
+        
         return x;
-    }
-
-    private Node rotateRight(Node h){
+    } // end rotateLeft()
+    
+    /**
+     * This method rotates nodes right around a given node
+     * 
+     * @param h the node around which rotation will occur
+     * @return the left child of the given node, in its new location
+     */
+    private Node rotateRight(Node h)
+    {
         Node x = h.getLeft();
         h.setLeft(x.getRight());
+        
         x.setRight(h);
         x.setColor(x.getRight().getColor());
         x.getLeft().setColor(BLACK);
         x.setColor(RED);
+        
         return x;
-    }
-
-    private Node colorFlip(Node x){
+    } // end rotateRight()
+    
+    /**
+     * This method flips the colors of a given node and its children
+     * 
+     * @param x The chosen parent node
+     * @return	the parent node
+     */
+    private Node colorFlip(Node x)
+    {
         // swaps the color of node x
         if (x.getColor() == RED) {x.setColor(BLACK);}
         else {x.setColor(RED);}
@@ -65,43 +92,16 @@ public class Tree {
         else {x.getRight().setColor(RED);}
 
         return x;
-    }
+    } //end colorFlip()
     
-    
-    private Node insert(Node current, Node node) {
-        if (current == null) {
-            node.setColor(RED);
-            return node;
-        }
-
-        int value = node.getValue();
-        if (value < current.getValue()) {
-            current.setLeft(insert(current.getLeft(), node));
-        } else if (value > current.getValue()) {
-            current.setRight(insert(current.getRight(), node));
-            
-        } else {
-            found = true;
-        }
-        
-        
-        
-        if (isRed(current.getRight()) && !isRed(current.getLeft() ) ) {
-            current = rotateLeft(current);
-        }
-        
-        if (isRed(current.getLeft()) && isRed(current.getLeft().getLeft())) {
-            current = rotateRight(current);
-        }
-        
-        if (isRed(current.getLeft()) && isRed(current.getRight())) {
-            current = colorFlip(current);
-        }
-        return current;
-    }
-    
-    
-    public boolean insertNode(Node node) {
+    /**
+     * The main insertion method, this method calls the recursive insert function and sets the root to black. If the tree is empty, the node is set to the root.
+     * 
+     * @param node The desired node to be input
+     * @return	True if the node is successfully inserted, returns False if a node with the given value exists in the tree
+     */
+    public boolean insertNode(Node node) 
+    {
         found = false;
 
         if (root == null) {
@@ -114,7 +114,51 @@ public class Tree {
         root.setColor(BLACK);
 
         return !found;
-    }
+    } // end insertNode()
+    
+    /**
+     * The recursive insertion method, the method recursively finds the proper location of the passed node and fixes the balanced criteria for the Tree
+     * 
+     * @param current The reference node for comparison, this tracks where the method is at in the tree
+     * @param node The node to be inserted
+     * @return the current node
+     */
+    private Node insert(Node current, Node node) 
+    {
+        if (current == null) {										// if the reference is null, insert the node here
+            node.setColor(RED);
+            return node;
+        }
+        
+        int value = node.getValue();								// this if else/if chain compares the node's value with that of 'current' (the reference node)
+        if (value < current.getValue()) {							//  and recursively calls the insert method to place the node left or right, in the proper location
+            current.setLeft(insert(current.getLeft(), node));
+        } else if (value > current.getValue()) {
+            current.setRight(insert(current.getRight(), node));
+            
+        } else {													// if the node exists, no if statements will be run and the insertNode function will return false
+            found = true;
+        }
+        
+        
+        																	// these if statements control the balanced properties of the tree,
+        if (isRed(current.getRight()) && !isRed(current.getLeft() ) ) {		//  they handle when node should rotate left, rotate right, and flip colors
+            current = rotateLeft(current);
+        }
+        
+        if (isRed(current.getLeft()) && isRed(current.getLeft().getLeft())) {
+            current = rotateRight(current);
+        }
+        
+        if (isRed(current.getLeft()) && isRed(current.getRight())) {
+            current = colorFlip(current);
+        }
+        
+        return current;												// the method will recursively fix the tree as new nodes are added, maintaining balance at any stage
+    } // end insert()
+    
+    
+    
 /*************************************************	End of Implementation   **************************************************************/
 
 	
